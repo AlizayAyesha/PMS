@@ -167,7 +167,7 @@ export function CheckoutForm() {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <Button type="submit" disabled={loading || !acceptedTerms} className="w-full rounded-full bg-brand-orange">
-        {loading ? 'Processing…' : 'Continue to payment'}
+        {loading ? 'Processing…' : 'Submit checkout request'}
       </Button>
     </form>
   );

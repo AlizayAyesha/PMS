@@ -31,6 +31,7 @@ import { RegisterModal } from "@/components/RegisterModal";
 import { cn } from "@/lib/utils";
 import { useWebsiteData } from "@/services/WebsiteDataService";
 import { BRAND, CTAS, HOME_COPY } from "@/lib/brand-voice";
+import { MARKETING_STOCK_IMAGES } from "@/lib/marketing-stock-images";
 import { PathwayFeaturedCard } from "@/components/PathwayFeaturedCard";
 import { FamilyExploreCard } from "@/components/FamilyExploreCard";
 import { SectionAmbience, sectionSurface } from "@/components/SectionAmbience";
@@ -40,8 +41,15 @@ import { useHomePageConfig } from '@/lib/home-config';
 
 import * as siteData from "@/data/siteData";
 
-/** Featured Pathways: exactly 6 cards in 2 rows × 3 columns on md+ */
+/** Featured Pathways: exactly 6 cards in 2 rows × 3 columns on lg+ */
 const featuredPathways = siteData.featuredCertifications;
+
+const SECTION_PY = 'py-16 sm:py-20 md:py-24 lg:py-32';
+const SECTION_HEADING_MB = 'mb-10 md:mb-16 lg:mb-20';
+const HERO_BTN =
+  'w-full sm:w-auto bg-brand-orange hover:bg-brand-hover text-white h-12 sm:h-14 px-6 sm:px-8 rounded-full font-bold text-base sm:text-lg shadow-lg shadow-brand-orange/20 transition-all';
+const HERO_BTN_OUTLINE =
+  'w-full sm:w-auto border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900 h-12 sm:h-14 px-6 sm:px-8 rounded-full font-bold text-base sm:text-lg transition-all';
 
 export function Home() {
   const { get } = useWebsiteData();
@@ -117,27 +125,27 @@ export function Home() {
 
   const renderPrimaryCta = () => {
     const label = homeCms.ctaPrimary || get('cta_primary', CTAS.pathwayConsultation);
-    const btnClass = "bg-brand-orange hover:bg-brand-hover text-white h-14 px-8 rounded-full font-bold text-lg shadow-lg shadow-brand-orange/20 transition-all";
+    const btnClass = HERO_BTN;
     const action = homeCms.primaryAction;
     if (action === 'register_modal') {
       return (
         <RegisterModal trigger={
-          <Button size="lg" className={btnClass}>{label}</Button>
+          <Button size="lg" className={cn(btnClass, 'block')}>{label}</Button>
         } />
       );
     }
     const href = action === 'contact' ? (homeCms.ctaPrimaryLink || '/contact?topic=consultation') : (homeCms.ctaPrimaryLink || '/membership');
     return (
-      <Link href={href}>
+      <Link href={href} className="block w-full sm:w-auto">
         <Button size="lg" className={btnClass}>{label}</Button>
       </Link>
     );
   };
 
   return (
-    <div className="flex flex-col min-h-screen selection:bg-brand-orange selection:text-white">
+    <div className="flex flex-col min-h-screen overflow-x-hidden selection:bg-brand-orange selection:text-white">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center pt-20 pb-24 overflow-visible bg-gradient-to-br from-violet-50/70 via-background to-orange-50/30 dark:from-[#0f0e38] dark:via-[#07071c] dark:to-[#12081a]">
+      <section className="relative min-h-0 md:min-h-[85vh] lg:min-h-[90vh] flex items-center pt-8 pb-12 sm:pt-12 sm:pb-16 md:pt-16 md:pb-20 lg:pt-20 lg:pb-24 overflow-hidden bg-gradient-to-br from-violet-50/70 via-background to-orange-50/30 dark:from-[#0f0e38] dark:via-[#07071c] dark:to-[#12081a]">
         {/* PMS gradient ambient — orange + blue-purple from logo system */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-[-12%] right-[-8%] w-[42%] h-[42%] rounded-full blur-[120px] opacity-30 bg-pms-gradient-orange" />
@@ -147,35 +155,35 @@ export function Home() {
         </div>
 
         <div className="container relative z-10 mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-24 items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="relative z-10"
+              className="relative z-10 min-w-0"
             >
-              <Badge className="mb-6 bg-brand-orange/10 text-brand-orange border-none px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]">
+              <Badge className="mb-4 sm:mb-6 bg-brand-orange/10 text-brand-orange border-none px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]">
                 {get('hero_badge', HOME_COPY.heroBadge)}
               </Badge>
               
-              <h1 className="font-heading text-hero font-bold text-slate-900 dark:text-white mb-8 tracking-tight leading-[1.1]">
+              <h1 className="font-heading text-hero font-bold text-slate-900 dark:text-white mb-6 sm:mb-8 tracking-tight leading-[1.1] text-balance">
                 {homeCms.heroTitle || get('hero_title', HOME_COPY.heroTitle)}
               </h1>
               
-              <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-lg leading-relaxed font-medium">
+              <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 sm:mb-10 max-w-lg leading-relaxed font-medium">
                 {homeCms.heroSubtitle || get('hero_subtitle', HOME_COPY.heroSubtitle)}
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                {renderPrimaryCta()}
-                <Link href={homeCms.ctaSecondaryLink || '/certifications'}>
-                  <Button size="lg" variant="outline" className="border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900 h-14 px-8 rounded-full font-bold text-lg transition-all">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <div className="w-full sm:w-auto">{renderPrimaryCta()}</div>
+                <Link href={homeCms.ctaSecondaryLink || '/certifications'} className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className={HERO_BTN_OUTLINE}>
                     {homeCms.ctaSecondary || get('cta_secondary', CTAS.findPathway)}
                   </Button>
                 </Link>
               </div>
               
-              <div className="mt-16 flex items-center gap-6">
+              <div className="mt-10 sm:mt-16 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                 <div className="flex -space-x-3">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="h-10 w-10 rounded-full border-2 border-white dark:border-slate-950 overflow-hidden shadow-sm">
@@ -186,6 +194,45 @@ export function Home() {
                 <div className="text-sm font-medium text-slate-500">
                   <span className="text-slate-900 dark:text-white font-bold">{statsCount.toLocaleString()}</span> {statsLabel}
                 </div>
+              </div>
+            </motion.div>
+
+            {/* Hero visual — tablet/mobile */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7 }}
+              className="relative z-20 lg:hidden"
+            >
+              <div className="relative aspect-[4/3] sm:aspect-[5/4] rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-100 dark:border-slate-800">
+                {homeCms.activeSlide?.heroImage?.url ? (
+                  <img
+                    src={homeCms.activeSlide.heroImage.url}
+                    alt={homeCms.activeSlide.heroImage.alt ?? homeCms.heroTitle}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={MARKETING_STOCK_IMAGES.hero}
+                    alt="Professional growth and certification readiness"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent" />
+              </div>
+              <div className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-lg border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-3 sm:gap-4 mb-2">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange shrink-0">
+                    <Award className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </div>
+                  <div className="font-bold text-lg sm:text-xl tracking-tight text-slate-900 dark:text-white">
+                    Readiness-led prep
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                  Across all certification pathways in 2026.
+                </p>
               </div>
             </motion.div>
 
@@ -203,17 +250,18 @@ export function Home() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                <div
-                  className="w-full h-full bg-gradient-to-br from-brand-purple/20 via-slate-100 to-brand-orange/20 dark:from-brand-purple/30 dark:via-slate-800 dark:to-brand-orange/20"
-                  role="img"
-                  aria-label="Professional growth and certification readiness"
-                />
+                  <img
+                    src={MARKETING_STOCK_IMAGES.hero}
+                    alt="Professional growth and certification readiness"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent" />
               </div>
 
               {/* Minimal Stats Card — high z-index so it sits above hero image and left column */}
-              <div className="absolute -bottom-10 -left-10 z-50 bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 ring-1 ring-slate-100/80 dark:ring-slate-700/80">
+              <div className="absolute -bottom-6 sm:-bottom-10 left-4 sm:-left-10 z-50 max-w-[calc(100%-2rem)] sm:max-w-none bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 ring-1 ring-slate-100/80 dark:ring-slate-700/80">
                 <div className="flex items-center gap-4 mb-2">
                   <div className="h-12 w-12 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange">
                     <Award className="h-6 w-6" />
@@ -228,14 +276,14 @@ export function Home() {
       </section>
 
       {(sections?.latestNews !== false) && homeCms.latestNews.length > 0 && (
-        <section className="py-24 bg-white dark:bg-slate-950">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <section className={`${SECTION_PY} bg-white dark:bg-slate-950`}>
+          <div className="container mx-auto">
+            <div className={`flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 ${SECTION_HEADING_MB}`}>
               <div>
                 <Badge className="mb-4 bg-brand-orange/10 text-brand-orange border-none px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]">
                   Latest News
                 </Badge>
-                <h2 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">
+                <h2 className="font-heading text-section font-bold text-slate-900 dark:text-white tracking-tight">
                   From the PMStructure desk
                 </h2>
               </div>
@@ -274,19 +322,19 @@ export function Home() {
       )}
 
       {(sections?.featuredPathways !== false) && (
-      <section className={sectionSurface('soft', 'py-32')}>
+      <section className={sectionSurface('soft', SECTION_PY)}>
         <SectionAmbience tone="soft" />
         <div className="container relative z-10 mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+          <div className={`flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8 ${SECTION_HEADING_MB}`}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="font-heading text-4xl md:text-6xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">
+              <h2 className="font-heading text-section font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-4 sm:mb-6">
                 Featured <span className="text-pms-gradient-orange">Pathways</span>
               </h2>
-              <p className="text-lg text-slate-500 dark:text-slate-400 max-w-lg font-medium leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-lg font-medium leading-relaxed">
                 {HOME_COPY.featuredSubtitle}
               </p>
             </motion.div>
@@ -298,7 +346,7 @@ export function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {featuredPathwaysResolved.map((featured, index) => {
               const cert = siteData.certifications.find(c => c.id === featured.id) || siteData.certifications[0];
               
@@ -326,16 +374,16 @@ export function Home() {
       )}
 
       {(sections?.programFamilies !== false) && (
-      <section className={sectionSurface('purple', 'py-32')}>
+      <section className={sectionSurface('purple', SECTION_PY)}>
         <SectionAmbience tone="purple" />
         <div className="container relative z-10 mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-20">
+          <div className={`text-center max-w-3xl mx-auto ${SECTION_HEADING_MB}`}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="font-heading text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight leading-none">
+              <h2 className="font-heading text-section font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight leading-none">
                 {get('frameworks_title', HOME_COPY.frameworksTitle)}
               </h2>
               <p className="text-lg text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
@@ -363,19 +411,19 @@ export function Home() {
       )}
 
       {(sections?.insightsBand !== false) && (
-      <section className="py-32 bg-slate-900 text-white dark:bg-slate-50 dark:text-slate-900 relative overflow-hidden [&_h2]:!text-white dark:[&_h2]:!text-slate-900 [&_h4]:!text-white dark:[&_h4]:!text-pms-navy">
+      <section className={`${SECTION_PY} bg-slate-900 text-white dark:bg-slate-50 dark:text-slate-900 relative overflow-hidden [&_h2]:!text-white dark:[&_h2]:!text-slate-900 [&_h4]:!text-white dark:[&_h4]:!text-pms-navy`}>
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-[-10%] right-[-5%] w-[35%] h-[35%] rounded-full blur-[100px] opacity-30 dark:opacity-50 bg-pms-gradient-blue-purple" />
           <div className="absolute bottom-[-10%] left-[-5%] w-[30%] h-[30%] rounded-full blur-[100px] opacity-25 dark:opacity-40 bg-pms-gradient-orange" />
         </div>
         <div className="container mx-auto relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-20 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="font-heading text-4xl md:text-6xl font-bold text-white dark:text-slate-900 mb-8 tracking-tight leading-tight">
+              <h2 className="font-heading text-section font-bold text-white dark:text-slate-900 mb-6 sm:mb-8 tracking-tight leading-tight">
                 {homeCms.insightsBand?.title ?? (<>Insights for the Future of <span className="text-pms-gradient-orange">Project Leadership</span></>)}
               </h2>
               <p className="text-lg text-slate-300 dark:text-slate-600 mb-12 leading-relaxed font-medium">
@@ -400,10 +448,11 @@ export function Home() {
               viewport={{ once: true }}
             >
               <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-700 dark:border-slate-200 group">
-                <div
-                  className="object-cover w-full h-full bg-gradient-to-tr from-brand-cyan/20 to-brand-purple/30 dark:from-slate-800 dark:to-brand-purple/40 transition-all duration-700"
-                  role="img"
-                  aria-label="Future of project management learning"
+                <img
+                  src={MARKETING_STOCK_IMAGES.insights}
+                  alt="Future of project management learning"
+                  className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
                 />
               </div>
               <div className="absolute -bottom-8 -left-8 bg-white text-slate-900 dark:bg-slate-900 dark:text-white p-8 rounded-3xl shadow-xl max-w-xs hidden xl:block border border-slate-200 dark:border-slate-700">
@@ -424,16 +473,16 @@ export function Home() {
       )}
 
       {(sections?.membership !== false) && (
-      <section className={sectionSurface('warm', 'py-32')}>
+      <section className={sectionSurface('warm', SECTION_PY)}>
         <SectionAmbience tone="warm" />
         <div className="container relative z-10 mx-auto">
-          <div className="max-w-3xl mx-auto text-center mb-20">
+          <div className={`max-w-3xl mx-auto text-center ${SECTION_HEADING_MB}`}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="font-heading text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight leading-none">
+              <h2 className="font-heading text-section font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight leading-none">
                 {homeCms.membership?.sectionTitle ?? get('membership_title', 'Membership Plans')}
               </h2>
               <p className="text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
@@ -457,7 +506,7 @@ export function Home() {
                 return (
                 <motion.div 
                   key={benefit.title} 
-                  className="flex gap-6 p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 transition-all group"
+                  className="flex flex-col sm:flex-row gap-4 sm:gap-6 p-5 sm:p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 transition-all group"
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -478,7 +527,7 @@ export function Home() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
             >
-              <Card className="bg-slate-900 text-white border-none shadow-xl p-10 h-full flex flex-col justify-between rounded-[2.5rem] relative overflow-hidden group [&_h3]:text-white">
+              <Card className="bg-slate-900 text-white border-none shadow-xl p-6 sm:p-10 h-full flex flex-col justify-between rounded-[2rem] sm:rounded-[2.5rem] relative overflow-hidden group [&_h3]:text-white">
                 <div className="relative z-10">
                   <Badge className="bg-brand-orange text-white border-none mb-8 px-4 py-1 text-[10px] font-bold uppercase tracking-widest">Best Value</Badge>
                   <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">Professional Membership</h3>
@@ -516,22 +565,22 @@ export function Home() {
       )}
 
       {(sections?.community !== false) && (
-      <section className={sectionSurface('blend', 'py-32')}>
+      <section className={sectionSurface('blend', SECTION_PY)}>
         <SectionAmbience tone="blend" />
         <div className="container relative z-10 mx-auto">
           <motion.div 
-            className="bg-slate-50 dark:bg-slate-900 rounded-[3rem] p-12 md:p-20 border border-slate-100 dark:border-slate-800 overflow-hidden relative"
+            className="bg-slate-50 dark:bg-slate-900 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 md:p-16 lg:p-20 border border-slate-100 dark:border-slate-800 overflow-hidden relative"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-20 items-center">
               <div>
                 <div className="flex items-center gap-3 text-brand-orange mb-8">
                   <Slack className="h-6 w-6" />
                   <span className="font-bold uppercase tracking-widest text-[10px]">{BRAND.name} Network</span>
                 </div>
-                <h2 className="font-heading text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">Join the Global <span className="text-brand-orange">PM Network</span></h2>
+                <h2 className="font-heading text-section font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight leading-tight">Join the Global <span className="text-brand-orange">PM Network</span></h2>
                 <p className="text-lg text-slate-600 dark:text-slate-400 mb-10 leading-relaxed font-medium">
                   Don't study in isolation. Connect with 1,284+ professionals in our Slack-based community.
                 </p>
@@ -550,8 +599,8 @@ export function Home() {
                     </div>
                   ))}
                 </div>
-                <Link href="/community">
-                  <Button variant="brand" className="h-14 px-10 rounded-2xl font-bold text-lg transition-all group/btn">
+                <Link href="/community" className="inline-block w-full sm:w-auto">
+                  <Button variant="brand" className="w-full sm:w-auto h-12 sm:h-14 px-8 sm:px-10 rounded-2xl font-bold text-base sm:text-lg transition-all group/btn">
                     Join Community
                     <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
                   </Button>
@@ -560,18 +609,38 @@ export function Home() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-6">
                   <div className="rounded-3xl overflow-hidden shadow-lg aspect-square">
-                    <div className="w-full h-full bg-brand-purple/10 dark:bg-brand-purple/20" aria-hidden />
+                    <img
+                      src={MARKETING_STOCK_IMAGES.communityGrid[0].src}
+                      alt={MARKETING_STOCK_IMAGES.communityGrid[0].alt}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
                   </div>
                   <div className="rounded-3xl overflow-hidden shadow-lg aspect-[4/3]">
-                    <div className="w-full h-full bg-brand-orange/10 dark:bg-brand-orange/20" aria-hidden />
+                    <img
+                      src={MARKETING_STOCK_IMAGES.communityGrid[1].src}
+                      alt={MARKETING_STOCK_IMAGES.communityGrid[1].alt}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
                   </div>
                 </div>
-                <div className="space-y-6 mt-12">
+                <div className="space-y-6 mt-0 lg:mt-12">
                   <div className="rounded-3xl overflow-hidden shadow-lg aspect-[4/3]">
-                    <div className="w-full h-full bg-brand-cyan/10 dark:bg-brand-cyan/20" aria-hidden />
+                    <img
+                      src={MARKETING_STOCK_IMAGES.communityGrid[2].src}
+                      alt={MARKETING_STOCK_IMAGES.communityGrid[2].alt}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
                   </div>
                   <div className="rounded-3xl overflow-hidden shadow-lg aspect-square">
-                    <div className="w-full h-full bg-slate-200/50 dark:bg-slate-700/50" aria-hidden />
+                    <img
+                      src={MARKETING_STOCK_IMAGES.communityGrid[3].src}
+                      alt={MARKETING_STOCK_IMAGES.communityGrid[3].alt}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
                   </div>
                 </div>
               </div>
@@ -582,17 +651,17 @@ export function Home() {
       )}
 
       {/* Newsletter Section */}
-      <section className={sectionSurface('cool', 'py-32')}>
+      <section className={sectionSurface('cool', SECTION_PY)}>
         <SectionAmbience tone="cool" />
         <div className="container relative z-10 mx-auto">
-          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-[3rem] p-12 md:p-20 relative overflow-hidden shadow-xl border border-slate-100 dark:border-slate-800">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 md:p-16 lg:p-20 relative overflow-hidden shadow-xl border border-slate-100 dark:border-slate-800">
             <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-slate-500/5 to-transparent pointer-events-none" />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-              <div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
+              <div className="min-w-0">
                 <Badge className="mb-6 bg-brand-orange/10 text-brand-orange border-none px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]">
                   Weekly Insights
                 </Badge>
-                <h2 className="font-heading text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
+                <h2 className="font-heading text-section font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight leading-tight">
                   The <span className="text-brand-orange">Structure</span> Report
                 </h2>
                 <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed font-medium max-w-lg">
@@ -618,7 +687,7 @@ export function Home() {
                   . Unsubscribe at any time.
                 </p>
               </div>
-              <div className="hidden lg:grid grid-cols-2 gap-6">
+              <div className="hidden md:grid grid-cols-2 gap-4 sm:gap-6">
                 {[
                   { title: "Exam Strategies", icon: Sparkles },
                   { title: "AI in PM", icon: Zap },
@@ -637,16 +706,16 @@ export function Home() {
       </section>
 
       {/* Career Tools Section */}
-      <section className={sectionSurface('soft', 'py-32')}>
+      <section className={sectionSurface('soft', SECTION_PY)}>
         <SectionAmbience tone="soft" />
         <div className="container relative z-10 mx-auto">
-          <div className="text-center mb-20">
+          <div className={`text-center ${SECTION_HEADING_MB}`}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="font-heading text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight leading-none">
+              <h2 className="font-heading text-section font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight leading-none">
                 Career <span className="text-brand-orange">Accelerators</span>
               </h2>
               <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-medium">
@@ -655,7 +724,7 @@ export function Home() {
             </motion.div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {[
               {
                 title: "CV Maker",
@@ -719,13 +788,13 @@ export function Home() {
       </section>
 
       {(sections?.testimonials !== false) && (
-      <section className={sectionSurface('cool', 'py-32 overflow-hidden')}>
+      <section className={sectionSurface('cool', cn(SECTION_PY, 'overflow-hidden'))}>
         <SectionAmbience tone="cool" />
         <div className="container relative z-10 mx-auto">
-          <div className="flex flex-col lg:flex-row gap-16 items-center">
-            <div className="lg:w-1/3">
+          <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-stretch lg:items-center">
+            <div className="lg:w-1/3 min-w-0">
               <Badge className="mb-6 bg-brand-orange/10 text-brand-orange border-none px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]">Our Impact</Badge>
-              <h2 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Student Success</h2>
+              <h2 className="font-heading text-section font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight">Student Success</h2>
               <p className="text-lg text-slate-500 dark:text-slate-400 mb-8 leading-relaxed font-medium">
                 Join professionals building structured project management capability with {BRAND.name}.
               </p>
@@ -748,7 +817,7 @@ export function Home() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {testimonials.map((_, idx) => (
                   <button
                     key={idx}
@@ -771,12 +840,12 @@ export function Home() {
               </div>
             </div>
 
-            <div className="lg:w-2/3 w-full">
-              <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
+            <div className="lg:w-2/3 w-full min-w-0">
+              <div className="overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y" ref={emblaRef}>
                 <div className="flex">
                   {testimonials.map((testimonial) => (
-                    <div key={testimonial.id} className="flex-[0_0_100%] md:flex-[0_0_50%] min-w-0 pl-6">
-                      <Card className="h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm p-8 rounded-[2.5rem] relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                    <div key={testimonial.id} className="flex-[0_0_100%] md:flex-[0_0_50%] min-w-0 pr-4 md:pr-6">
+                      <Card className="h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] relative overflow-hidden group hover:shadow-xl transition-all duration-500">
                         <Quote className="absolute top-8 right-8 h-12 w-12 text-slate-50 dark:text-slate-800/50 -rotate-12 transition-transform group-hover:rotate-0" />
                         <div className="relative z-10">
                           <div className="flex items-center text-yellow-500 mb-6">
@@ -807,13 +876,13 @@ export function Home() {
       )}
 
       {(sections?.globalFootprint !== false) && homeCms.activeFootprint.length > 0 && (
-        <section className="py-32 bg-white dark:bg-slate-950">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mb-16">
+        <section className={`${SECTION_PY} bg-white dark:bg-slate-950`}>
+          <div className="container mx-auto">
+            <div className={`max-w-3xl ${SECTION_HEADING_MB}`}>
               <Badge className="mb-6 bg-brand-orange/10 text-brand-orange border-none px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]">
                 Global Footprint
               </Badge>
-              <h2 className="font-heading text-4xl md:text-6xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">
+              <h2 className="font-heading text-section font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-4 sm:mb-6">
                 Work, learning, and impact across regions
               </h2>
               <p className="text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
@@ -844,11 +913,11 @@ export function Home() {
       )}
 
       {(sections?.finalCta !== false) && (
-      <section className={sectionSurface('warm', 'py-32')}>
+      <section className={sectionSurface('warm', SECTION_PY)}>
         <SectionAmbience tone="warm" />
         <div className="container relative z-10 mx-auto">
           <motion.div 
-            className="relative rounded-[3rem] bg-slate-900 overflow-hidden px-8 py-20 md:px-20 md:py-32 text-center shadow-2xl [&_h2]:text-white"
+            className="relative rounded-[2rem] sm:rounded-[3rem] bg-slate-900 overflow-hidden px-5 py-14 sm:px-8 sm:py-20 md:px-16 md:py-24 lg:px-20 lg:py-32 text-center shadow-2xl [&_h2]:text-white"
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -856,34 +925,34 @@ export function Home() {
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-brand-orange/10 to-transparent pointer-events-none" />
             
             <div className="relative z-10 max-w-4xl mx-auto">
-              <h2 className="font-heading text-4xl md:text-7xl font-bold text-white mb-8 tracking-tight leading-tight">
+              <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-6 sm:mb-8 tracking-tight leading-tight text-balance">
                 {finalCta?.title || <>Ready to Start Your <span className="text-brand-orange">Journey?</span></>}
               </h2>
-              <p className="text-slate-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
+              <p className="text-slate-400 text-base sm:text-lg md:text-xl mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
                 {finalCta?.description ||
                   'Start with eligibility, timeline, and weekly study capacity.'}
               </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                 {finalCta?.ctaLink ? (
-                  <Link href={finalCta.ctaLink}>
-                    <Button size="lg" className="bg-brand-orange hover:bg-brand-hover text-white h-14 px-10 text-lg font-bold rounded-2xl shadow-xl transition-all group/btn">
+                  <Link href={finalCta.ctaLink} className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full sm:w-auto bg-brand-orange hover:bg-brand-hover text-white h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-bold rounded-2xl shadow-xl transition-all group/btn">
                       {finalCta.ctaText || 'Learn More'}
                       <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
                     </Button>
                   </Link>
                 ) : (
                   <RegisterModal trigger={
-                    <Button size="lg" className="bg-brand-orange hover:bg-brand-hover text-white h-14 px-10 text-lg font-bold rounded-2xl shadow-xl transition-all group/btn">
+                    <Button size="lg" className="w-full sm:w-auto bg-brand-orange hover:bg-brand-hover text-white h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-bold rounded-2xl shadow-xl transition-all group/btn">
                       Create Free Account
                       <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
                     </Button>
                   } />
                 )}
-                <Link href="/certifications">
+                <Link href="/certifications" className="w-full sm:w-auto">
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-white/20 bg-white text-black hover:bg-slate-100 hover:text-black dark:bg-transparent dark:text-white dark:border-white/30 dark:hover:bg-white/10 dark:hover:text-white h-14 px-10 text-lg font-bold rounded-2xl transition-all"
+                    className="w-full sm:w-auto border-white/20 bg-white text-black hover:bg-slate-100 hover:text-black dark:bg-transparent dark:text-white dark:border-white/30 dark:hover:bg-white/10 dark:hover:text-white h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-bold rounded-2xl transition-all"
                   >
                     Browse Courses
                   </Button>

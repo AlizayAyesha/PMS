@@ -22,6 +22,8 @@ function targetFor(req) {
   const referer = req.headers.referer ?? '';
 
   if (url.startsWith('/api/channel-landing-pages')) return DASH;
+  if (url.startsWith('/api/auth')) return DASH_API;
+  if (url.startsWith('/api/cms')) return DASH_API;
   if (url.startsWith('/api/interactions')) return DASH_API;
   if (url.startsWith('/api') && isDashboardReferer(referer)) return DASH_API;
   if (url.startsWith('/api')) return API;

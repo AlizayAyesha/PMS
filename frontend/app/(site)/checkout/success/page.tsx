@@ -30,7 +30,7 @@ function CheckoutSuccessContent() {
       <div className="container relative z-10 mx-auto max-w-lg text-center">
         <h1 className="font-heading text-hero font-bold mb-4">Thank you</h1>
         <p className="text-slate-600 dark:text-slate-400 mb-4">
-          Your checkout session was created. Complete payment when Stripe is configured.
+          Your checkout request was recorded. Our team will follow up by email with next steps — no card payment is taken on this site.
         </p>
         {offering && (
           <p className="text-sm font-semibold text-brand-orange mb-8">

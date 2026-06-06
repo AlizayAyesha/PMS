@@ -1,8 +1,8 @@
 /**
- * Apply SQL files in supabase/migrations/ using DATABASE_URL from .env (repo root).
+ * Apply SQL files in supabase/migrations/ using DATABASE_URL.
  *
- * Usage: node scripts/apply-supabase-migrations.mjs
- * Requires: DATABASE_URL=postgresql://postgres.[ref]:[password]@... (Supabase → Settings → Database)
+ * Usage: npm run db:migrate
+ * Loads env from repo root + app .env.local files (see ENV_FILES below).
  */
 
 import fs from 'fs';
@@ -11,6 +11,15 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
+
+const ENV_FILES = [
+  path.join(ROOT, '.env'),
+  path.join(ROOT, '.env.local'),
+  path.join(ROOT, 'frontend', '.env.local'),
+  path.join(ROOT, 'backend', '.env.local'),
+  path.join(ROOT, 'dashboard', 'frontend', '.env.local'),
+  path.join(ROOT, 'dashboard', 'backend', '.env.local'),
+];
 
 function loadEnvFile(filePath) {
   if (!fs.existsSync(filePath)) return {};
@@ -30,32 +39,64 @@ function loadEnvFile(filePath) {
   return env;
 }
 
-const env = { ...loadEnvFile(path.join(ROOT, '.env')), ...loadEnvFile(path.join(ROOT, '.env.local')) };
-const databaseUrl = env.DATABASE_URL || env.SUPABASE_DB_URL;
+const env = {};
+for (const file of ENV_FILES) {
+  Object.assign(env, loadEnvFile(file));
+}
 
-if (!databaseUrl) {
+function projectRefFromUrl(url) {
+  const m = url?.match(/https:\/\/([^.]+)\.supabase\.co/);
+  return m?.[1] ?? null;
+}
+
+const ref =
+  projectRefFromUrl(env.NEXT_PUBLIC_SUPABASE_URL) ||
+  projectRefFromUrl(env.SUPABASE_URL) ||
+  'YOUR_PROJECT_REF';
+
+const dbPassword = process.env.SUPABASE_DB_PASSWORD || env.SUPABASE_DB_PASSWORD;
+let databaseUrl = env.DATABASE_URL || env.SUPABASE_DB_URL;
+if ((!databaseUrl || databaseUrl.includes('YOUR_DB_PASSWORD')) && dbPassword && ref) {
+  databaseUrl = `postgresql://postgres:${encodeURIComponent(dbPassword)}@db.${ref}.supabase.co:5432/postgres`;
+}
+
+if (!databaseUrl || databaseUrl.includes('YOUR_DB_PASSWORD')) {
   console.error(`
-DATABASE_URL is not set.
+DATABASE_URL is not set (or still has placeholder YOUR_DB_PASSWORD).
 
-1. Copy .env.example → .env
-2. In Supabase Dashboard → Project Settings → Database → Connection string (URI),
-   set DATABASE_URL=postgresql://postgres.[project-ref]:[YOUR-PASSWORD]@aws-0-....pooler.supabase.com:6543/postgres
+1. Supabase Dashboard → Project Settings → Database → Connection string → URI
+2. Add to repo root .env.local (create if missing):
+
+   SUPABASE_DB_PASSWORD=your_database_password
+   # or DATABASE_URL=postgresql://postgres:PASSWORD@db.${ref}.supabase.co:5432/postgres
+
+   (Password: Supabase → Settings → Database → Database password)
+
 3. Re-run: npm run db:migrate
 
-Or paste these files manually in SQL Editor (in order):
-  - supabase/migrations/20240517000000_initial_schema.sql
-  - supabase/migrations/20260523100000_regional_catalogue.sql
-  - supabase/migrations/20260523100001_seed_regions.sql
-  - supabase/migrations/20260523100002_catalogue_meta.sql
+Auth-only (if you already ran other migrations): paste
+  supabase/manual-dashboard-one-auth.sql
+in Supabase SQL Editor instead.
+
+Env files checked:
+${ENV_FILES.map((f) => `  - ${path.relative(ROOT, f)}`).join('\n')}
 `);
   process.exit(1);
 }
 
+const onlyAuth = process.argv.includes('--only-auth');
 const migrationsDir = path.join(ROOT, 'supabase', 'migrations');
-const files = fs
+let files = fs
   .readdirSync(migrationsDir)
   .filter((f) => f.endsWith('.sql'))
   .sort();
+if (onlyAuth) {
+  files = files.filter((f) => f.includes('dashboard_one'));
+  if (files.length === 0) {
+    console.error('No dashboard_one migration files found in supabase/migrations/');
+    process.exit(1);
+  }
+}
 
 const { default: pg } = await import('pg');
 const client = new pg.Client({ connectionString: databaseUrl, ssl: { rejectUnauthorized: false } });

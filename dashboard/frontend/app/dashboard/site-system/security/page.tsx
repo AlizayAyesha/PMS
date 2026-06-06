@@ -1,5 +1,5 @@
-import { PlaceholderPage } from '@/components/PlaceholderPage';
+import { SecuritySettings } from '@/components/pages/admin/SecuritySettings';
 
 export default function Page() {
-  return <PlaceholderPage title="Security & Audit" />;
+  return <SecuritySettings />;
 }

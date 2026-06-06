@@ -11,6 +11,7 @@ import {
 } from '@pms/site-content';
 import { useSiteDocumentDraft } from '@/hooks/useSiteDocumentDraft';
 import { SiteDocumentEditorShell } from './site-content/SiteDocumentEditorShell';
+import { MediaPicker } from './site-content/MediaPicker';
 
 function defaultCategoryId(catalog: StoreCatalog): string {
   const first = catalog.categories.find((c) => c.id !== 'all');
@@ -152,6 +153,28 @@ export function StoreCatalogEditor() {
                   ))}
               </select>
             </label>
+            <MediaPicker
+              label="Product image"
+              value={product.image?.url ?? product.imageUrl ?? ''}
+              onChange={(url) =>
+                setConfig((c) => {
+                  const products = [...c.products];
+                  const trimmed = url.trim();
+                  products[idx] = {
+                    ...products[idx],
+                    imageUrl: trimmed || undefined,
+                    image: trimmed
+                      ? {
+                          id: `product-img-${product.id}`,
+                          url: trimmed,
+                          alt: product.title,
+                        }
+                      : undefined,
+                  };
+                  return { ...c, products };
+                })
+              }
+            />
             <div className="grid grid-cols-2 gap-2">
               <label className="block space-y-1">
                 <span className="text-xs font-bold uppercase text-muted-foreground">Price (USD)</span>

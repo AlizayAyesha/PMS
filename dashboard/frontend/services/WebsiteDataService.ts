@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { isSupabaseAuthConfigured, supabase } from '@/lib/supabase';
+import { getDashboardApiHeaders } from '@/lib/auth/dashboard-api-headers';
 
 export interface WebsiteData {
   id: string;
@@ -10,6 +10,8 @@ export interface WebsiteData {
   is_published: boolean;
   updated_at: string;
 }
+
+const USE_CMS_API = process.env.NEXT_PUBLIC_AUTH_USE_API_LOGIN === 'true';
 
 function toErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message) return error.message;
@@ -20,60 +22,89 @@ function toErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+async function cmsFetch(path: string, init?: RequestInit) {
+  const res = await fetch(path, {
+    ...init,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getDashboardApiHeaders(),
+      ...(init?.headers as Record<string, string> | undefined),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      (data as { error?: string }).error || `CMS API error (${res.status})`,
+    );
+  }
+  return data;
+}
+
 export const WebsiteDataService = {
-  isConfigured: () => isSupabaseAuthConfigured,
+  isConfigured: () => USE_CMS_API || Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
 
   async getData(view: 'draft' | 'published' = 'draft') {
-    if (!isSupabaseAuthConfigured) {
-      return [] as WebsiteData[];
+    if (!USE_CMS_API) {
+      const { isSupabaseAuthConfigured, supabase } = await import('@/lib/supabase');
+      if (!isSupabaseAuthConfigured) return [] as WebsiteData[];
+      const query = supabase.from('website_data').select('*');
+      if (view === 'published') query.eq('is_published', true);
+      const { data, error } = await query;
+      if (error) throw new Error(toErrorMessage(error, 'Failed to load website data'));
+      return (data ?? []) as WebsiteData[];
     }
 
-    const query = supabase.from('website_data').select('*');
-    if (view === 'published') {
-      query.eq('is_published', true);
-    }
-    const { data, error } = await query;
-    if (error) {
-      throw new Error(toErrorMessage(error, 'Failed to load website data from Supabase.'));
-    }
-    return (data ?? []) as WebsiteData[];
+    const q = view === 'published' ? '?view=published' : '';
+    const result = (await cmsFetch(`/api/cms/website-data${q}`)) as { data: WebsiteData[] };
+    return result.data ?? [];
   },
 
   async saveDraft(fieldKey: string, content: Record<string, unknown>) {
-    if (!isSupabaseAuthConfigured) {
-      throw new Error('Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+    if (!USE_CMS_API) {
+      const { isSupabaseAuthConfigured, supabase } = await import('@/lib/supabase');
+      if (!isSupabaseAuthConfigured) {
+        throw new Error('Supabase is not configured.');
+      }
+      const { data, error } = await supabase
+        .from('website_data')
+        .upsert(
+          {
+            field_key: fieldKey,
+            content,
+            is_published: false,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'field_key' },
+        );
+      if (error) throw new Error(toErrorMessage(error, 'Failed to save draft.'));
+      return data;
     }
 
-    const { data, error } = await supabase
-      .from('website_data')
-      .upsert(
-        {
-          field_key: fieldKey,
-          content,
-          is_published: false,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'field_key' },
-      );
-    if (error) {
-      throw new Error(toErrorMessage(error, 'Failed to save draft.'));
-    }
-    return data;
+    return cmsFetch('/api/cms/website-data', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'saveDraft', fieldKey, content }),
+    });
   },
 
   async publish(fieldKey: string) {
-    if (!isSupabaseAuthConfigured) {
-      throw new Error('Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+    if (!USE_CMS_API) {
+      const { isSupabaseAuthConfigured, supabase } = await import('@/lib/supabase');
+      if (!isSupabaseAuthConfigured) {
+        throw new Error('Supabase is not configured.');
+      }
+      const { data, error } = await supabase
+        .from('website_data')
+        .update({ is_published: true })
+        .eq('field_key', fieldKey);
+      if (error) throw new Error(toErrorMessage(error, 'Failed to publish.'));
+      return data;
     }
 
-    const { data, error } = await supabase
-      .from('website_data')
-      .update({ is_published: true })
-      .eq('field_key', fieldKey);
-    if (error) {
-      throw new Error(toErrorMessage(error, 'Failed to publish.'));
-    }
-    return data;
+    return cmsFetch('/api/cms/website-data', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'publish', fieldKey }),
+    });
   },
 };
 

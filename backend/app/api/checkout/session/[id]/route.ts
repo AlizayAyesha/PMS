@@ -8,6 +8,6 @@ export async function GET(
   return jsonOk({
     sessionId: id,
     status: 'pending',
-    message: 'Stripe session lookup — configure STRIPE_SECRET_KEY for live status.',
+    message: 'Checkout recorded — no online card payment on this site.',
   });
 }

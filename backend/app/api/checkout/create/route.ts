@@ -6,7 +6,7 @@ import {
 import { isConsultationApproved } from '@/lib/consultation-approval';
 import { membershipPriceUsdCents } from '@/lib/membership-pricing';
 import { verifyRegion } from '@/lib/verify-region';
-import { createStripeCheckoutSession } from '@/lib/stripe';
+import { createCheckoutSession } from '@/lib/checkout-session';
 import { isSupabaseConfigured, supabaseAdmin } from '@/lib/supabase-admin';
 import { jsonError, jsonOk } from '@/lib/response-helpers.js';
 import type { RegionId } from '@/lib/regional-catalogue';
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
   const defaultSuccess = `${origin}/checkout/success?offering=${offeringId}`;
   const defaultCancel = `${origin}/checkout/cancel?offering=${offeringId}`;
 
-  const session = await createStripeCheckoutSession({
+  const session = await createCheckoutSession({
     offeringId,
     usdCents,
     email,

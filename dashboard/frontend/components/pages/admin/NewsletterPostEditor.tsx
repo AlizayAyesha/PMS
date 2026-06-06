@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -10,9 +10,8 @@ import {
   Save,
   Search,
   Tag,
-  Upload,
-  X,
 } from 'lucide-react';
+import { MediaPicker } from '@/components/pages/admin/site-content/MediaPicker';
 import { Button } from '@/components/ui/button';
 import { NavLinkButton } from '@/components/ui/nav-link-button';
 import { Input } from '@/components/ui/input';
@@ -56,7 +55,6 @@ function SectionCard({
 
 export function NewsletterPostEditor({ postId }: { postId?: string }) {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { getPostById, upsertPost, isLoading, isSaving } = useNewsletterPosts();
   const [post, setPost] = useState<NewsletterPost | null>(null);
   const [topicsInput, setTopicsInput] = useState('');
@@ -95,16 +93,6 @@ export function NewsletterPostEditor({ postId }: { postId?: string }) {
         metaTitle: current.metaTitle || title,
       };
     });
-  };
-
-  const handleImageUpload = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        updatePost({ featuredImageUrl: reader.result });
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
@@ -226,68 +214,13 @@ export function NewsletterPostEditor({ postId }: { postId?: string }) {
         </SectionCard>
 
         <SectionCard title="Feature Image" icon={ImageIcon}>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) handleImageUpload(file);
-            }}
+          <MediaPicker
+            label="Feature image"
+            value={
+              post.featuredImageUrl.startsWith('data:') ? '' : post.featuredImageUrl
+            }
+            onChange={(url) => updatePost({ featuredImageUrl: url })}
           />
-          {post.featuredImageUrl ? (
-            <div className="space-y-4">
-              <div className="overflow-hidden rounded-xl border border-border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={post.featuredImageUrl}
-                  alt="Featured preview"
-                  className="max-h-72 w-full object-cover"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="gap-2"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload size={16} />
-                  Replace Image
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="gap-2 text-destructive"
-                  onClick={() => updatePost({ featuredImageUrl: '' })}
-                >
-                  <X size={16} />
-                  Remove Image
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border bg-muted/20 px-6 py-12 text-center transition-colors hover:border-foreground/20 hover:bg-muted/30"
-            >
-              <Upload size={28} className="text-muted-foreground" />
-              <div>
-                <p className="text-sm font-semibold text-foreground">Upload Image</p>
-                <p className="mt-1 text-xs text-muted-foreground">PNG, JPG or WEBP up to 5MB</p>
-              </div>
-            </button>
-          )}
-          <div className="mt-4">
-            <FieldLabel>Or paste image URL</FieldLabel>
-            <Input
-              value={post.featuredImageUrl.startsWith('data:') ? '' : post.featuredImageUrl}
-              onChange={(event) => updatePost({ featuredImageUrl: event.target.value })}
-              placeholder="https://..."
-            />
-          </div>
         </SectionCard>
 
         <SectionCard title="SEO Details" icon={Search}>

@@ -1,0 +1,7 @@
+# PM Structure — link this repo to Supabase CLI / Cursor MCP
+# Project ref must match NEXT_PUBLIC_SUPABASE_URL in .env.local
+project_id = "vmuwflogvpaahgjjdlmr"
+
+[api]
+schemas = ["public", "storage", "graphql_public", "dashboard_one"]
+extra_search_path = ["public", "extensions"]

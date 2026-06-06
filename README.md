@@ -56,7 +56,7 @@ npm run setup:env           # copy .env.example → .env if missing
 2. Set `NEXT_PUBLIC_API_URL=http://localhost:3000` in `frontend/.env.local` (see `.env.example`; gateway proxies to API on :3001).
 3. Place `PM_Structure_Regional_Availability_Matrix.xlsx` (or set `REGIONAL_MATRIX_XLSX_PATH`).
 4. After Excel edits: `npm run import:regional` → `npm run validate:regional` → commit `frontend/data/regional-catalogue.json`.
-5. For live checkout: set `STRIPE_SECRET_KEY` in `backend/.env.local` (mock sessions when unset).
+5. Checkout records enrollment requests in Supabase — no card payment integration.
 6. Full spec: `docs/REGIONAL_AVAILABILITY_IMPLEMENTATION_PLAN.md`.
 
 ## URLs (local dev)

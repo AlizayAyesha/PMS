@@ -31,7 +31,7 @@ const PANEL_ICON = {
 } as const;
 
 const MATERIAL_FULLSCREEN_DIALOG_CLASS = cn(
-  'z-[100] flex max-h-[100dvh] max-w-[100vw] flex-col gap-0 rounded-none border-0 bg-slate-950 p-0 shadow-none',
+  'z-[120] flex max-h-[100dvh] max-w-[100vw] flex-col gap-0 rounded-none border-0 bg-slate-950 p-0 shadow-none',
   'h-[100dvh] w-[100vw] sm:max-w-[100vw]',
   'top-0 left-0 translate-x-0 translate-y-0',
   'data-open:zoom-in-100 data-closed:zoom-out-100',

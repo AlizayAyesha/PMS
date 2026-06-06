@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Users, BookOpen, Sparkles, FileText, Gift } from "lucide-react";
+import { Check, Users, Sparkles, FileText, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWebsiteData } from "@/services/WebsiteDataService";
 import { usePublishedSiteDocument } from "@/lib/usePublishedSiteDocument";
@@ -22,6 +22,7 @@ import {
   MEMBERSHIP_PRICING,
 } from '@/lib/membership-plans';
 import { getRegionalMembershipAmounts } from '@/lib/membership-regional-pricing';
+import { MARKETING_STOCK_IMAGES } from '@/lib/marketing-stock-images';
 
 import * as siteData from "@/data/siteData";
 import { PricingComplianceNote } from '@/components/PricingComplianceNote';
@@ -284,7 +285,7 @@ export function Membership() {
                       </ul>
                     </div>
                   </CardContent>
-                  <CardFooter className="flex justify-center p-8 pt-0">
+                  <CardFooter className="flex justify-center px-8 pb-8 pt-[10%]">
                     <Link
                       href={tier.highlight ? "/membership" : "/contact"}
                       className="w-full max-w-[280px]"
@@ -374,12 +375,20 @@ export function Membership() {
                 </Link>
               </div>
               <div className="grid grid-cols-2 gap-6">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className={cn(
-                    "aspect-square rounded-3xl bg-slate-800/50 border border-slate-700 flex items-center justify-center p-8 shadow-lg transition-transform hover:scale-105",
-                    i % 2 === 0 ? "mt-8" : ""
-                  )}>
-                    <BookOpen className="h-12 w-12 text-slate-500" />
+                {MARKETING_STOCK_IMAGES.membershipResources.map((image, i) => (
+                  <div
+                    key={image.alt}
+                    className={cn(
+                      'aspect-square rounded-3xl overflow-hidden border border-slate-700 shadow-lg transition-transform hover:scale-105',
+                      i % 2 === 1 ? 'mt-8' : '',
+                    )}
+                  >
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      className="h-full w-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
                   </div>
                 ))}
               </div>

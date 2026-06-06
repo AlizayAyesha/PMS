@@ -291,7 +291,7 @@ export const FAQ_ENTRIES: FaqEntry[] = [
   P(
     'privacy',
     'What data do you collect at checkout?',
-    'Email, residence and billing country, verification fields, order metadata, and payment data via Stripe. See [Privacy](/legal/privacy).',
+    'Email, residence and billing country, verification fields, and order metadata when you submit checkout. We do not collect card numbers on this site. See [Privacy](/legal/privacy).',
     'privacy-checkout',
   ),
   P(
@@ -333,7 +333,7 @@ export const FAQ_ENTRIES: FaqEntry[] = [
   P(
     'support',
     'Is my payment secure?',
-    'Checkout uses Stripe. We do not store full card numbers on our servers.',
+    'Checkout records your request and pricing selection. Payment is arranged offline — we do not process cards on this website.',
     'support-pay',
   ),
   P(
@@ -405,7 +405,7 @@ export const FAQ_ENTRIES: FaqEntry[] = [
   P(
     'privacy',
     'Where is my data stored?',
-    'We use reputable cloud providers listed in our [Subprocessors](/legal/subprocessors) page.\n\n• Payments: Stripe.\n• Database and auth: Supabase (region per project).\n• Hosting serves the marketing site and API.\n• Email support at support@pmstructure.com for enterprise data questions.',
+    'We use reputable cloud providers listed in our [Subprocessors](/legal/subprocessors) page.\n\n• Database and auth: Supabase (region per project).\n• Hosting serves the marketing site and API.\n• Email support at support@pmstructure.com for enterprise data questions.',
     'privacy-hosting',
   ),
   P(

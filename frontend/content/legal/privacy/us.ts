@@ -16,7 +16,7 @@ export const privacyUsDocument: LegalDocument = {
     section(
       'sources',
       '2. Sources',
-      'Directly from you (forms, checkout, support), automatically from your device (cookies/logs), and from payment processors (Stripe) when you pay.',
+      'Directly from you (forms, checkout, support) and automatically from your device (cookies/logs). We do not process card payments on this website.',
     ),
     section(
       'rights',

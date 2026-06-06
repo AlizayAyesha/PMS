@@ -37,12 +37,15 @@ export function createDemoUser(email: string): User {
 
 export function persistDemoSession(email: string) {
   if (typeof window === 'undefined') return;
-  sessionStorage.setItem(DEMO_SESSION_KEY, email.trim().toLowerCase() || 'admin@pms.os');
+  const normalized = email.trim().toLowerCase() || 'admin@pms.os';
+  sessionStorage.setItem(DEMO_SESSION_KEY, normalized);
+  document.cookie = `${DEMO_SESSION_KEY}=${encodeURIComponent(normalized)}; path=/; max-age=86400; SameSite=Lax`;
 }
 
 export function clearDemoSession() {
   if (typeof window === 'undefined') return;
   sessionStorage.removeItem(DEMO_SESSION_KEY);
+  document.cookie = `${DEMO_SESSION_KEY}=; path=/; max-age=0`;
 }
 
 export function readDemoSessionEmail(): string | null {

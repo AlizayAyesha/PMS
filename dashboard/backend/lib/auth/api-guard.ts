@@ -1,15 +1,9 @@
 import type { NextRequest } from 'next/server';
-import { createHmac } from 'node:crypto';
-
-const DEFAULT_ADMIN_EMAILS = new Set(['admin@pms.os', 'admin@platform.os']);
-
-export function isKnownAdminEmail(email: string): boolean {
-  const normalized = email.trim().toLowerCase();
-  if (!normalized) return false;
-  if (DEFAULT_ADMIN_EMAILS.has(normalized)) return true;
-  const extra = process.env.DASHBOARD_ADMIN_EMAILS?.split(',') ?? [];
-  return extra.some((entry) => entry.trim().toLowerCase() === normalized);
-}
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { assertSameOrigin } from '@/lib/auth/csrf-origin';
+import { isKnownAdminEmail } from '@/lib/auth/known-users';
+import { getSessionSecret, verifySignedSessionToken } from '@/lib/auth/session-token';
 
 export function getBearerSessionEmail(request: NextRequest): string | null {
   const auth = request.headers.get('authorization');
@@ -17,31 +11,13 @@ export function getBearerSessionEmail(request: NextRequest): string | null {
   const token = auth.slice(7).trim();
   if (!token) return null;
 
-  const secret = process.env.DASHBOARD_SESSION_SECRET?.trim();
+  const secret = getSessionSecret();
   if (secret) {
     const signedEmail = verifySignedSessionToken(token, secret);
     if (signedEmail) return signedEmail;
   }
 
   return decodeJwtEmail(token);
-}
-
-function verifySignedSessionToken(token: string, secret: string): string | null {
-  const parts = token.split('.');
-  if (parts.length !== 3) return null;
-  try {
-    const payload = parts[1];
-    const expected = createHmac('sha256', secret).update(payload).digest('base64url');
-    if (parts[2] !== expected) return null;
-    const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
-      email?: string;
-      exp?: number;
-    };
-    if (data.exp && Date.now() > data.exp * 1000) return null;
-    return typeof data.email === 'string' ? data.email : null;
-  } catch {
-    return null;
-  }
 }
 
 function decodeJwtEmail(token: string): string | null {
@@ -51,8 +27,53 @@ function decodeJwtEmail(token: string): string | null {
     const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
       email?: string;
     };
-    return typeof data.email === 'string' ? data.email : null;
+    return typeof data.email === 'string' ? data.email.trim().toLowerCase() : null;
   } catch {
     return null;
   }
+}
+
+export function readDashboardSessionEmailFromRequest(request: NextRequest): string | null {
+  const secret = getSessionSecret();
+  const token = request.cookies.get('gw_dashboard_session')?.value?.trim();
+  if (token && secret) {
+    return verifySignedSessionToken(token, secret);
+  }
+  return null;
+}
+
+export async function requireDashboardMutationAuth(
+  request: NextRequest,
+): Promise<NextResponse | null> {
+  if (!assertSameOrigin(request)) {
+    return NextResponse.json({ success: false, error: 'Invalid origin' }, { status: 403 });
+  }
+
+  const cookieEmail = readDashboardSessionEmailFromRequest(request);
+  if (cookieEmail && isKnownAdminEmail(cookieEmail)) return null;
+
+  const bearerEmail = getBearerSessionEmail(request);
+  if (bearerEmail && isKnownAdminEmail(bearerEmail)) return null;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (url && anon) {
+    const authHeader = request.headers.get('authorization');
+    const accessToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : request.cookies.get('sb-access-token')?.value;
+    if (accessToken) {
+      const supabase = createClient(url, anon);
+      const { data, error } = await supabase.auth.getUser(accessToken);
+      if (!error && data.user?.email && isKnownAdminEmail(data.user.email)) {
+        return null;
+      }
+    }
+  }
+
+  if (process.env.NODE_ENV === 'development' && !getSessionSecret() && assertSameOrigin(request)) {
+    return null;
+  }
+
+  return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 }

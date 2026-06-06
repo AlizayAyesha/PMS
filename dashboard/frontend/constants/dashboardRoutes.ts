@@ -8,6 +8,7 @@ import {
   LineChart,
   Settings,
   History,
+  ImageIcon,
   Newspaper,
   Radio,
   ClipboardList,
@@ -68,6 +69,7 @@ const OVERVIEW_NAV: DashboardNavSection = {
   title: 'Overview',
   items: [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Media library', path: '/dashboard/site-system/media-library', icon: ImageIcon },
     { name: 'Posts', path: '/dashboard/cms/posts', icon: FileText },
     { name: 'Topics', path: '/dashboard/cms/topics', icon: Tag },
     NEWSLETTER_NAV_ITEM,

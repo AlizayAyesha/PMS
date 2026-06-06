@@ -65,7 +65,7 @@ export function PathwayOfferingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-[2rem] sm:max-w-2xl max-h-[min(92vh,900px)] flex flex-col">
+      <DialogContent className="rounded-[2rem] sm:max-w-4xl max-h-[min(92vh,900px)] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold tracking-tight pr-8">{programmeTitle}</DialogTitle>
           <DialogDescription className="text-base font-medium leading-relaxed">{intro}</DialogDescription>
