@@ -12,7 +12,7 @@ import { writeAuthAuditLog } from '@/lib/auth/audit-log';
 import { buildLoginSuccessResponse, isLegacyLoginEnabled } from '@/lib/auth/login-session';
 import { getLoginFingerprint, maskEmail, phoneLast4 } from '@/lib/auth/login-fingerprint';
 import { generateOtpCode, hashOtpCode } from '@/lib/auth/password-crypto';
-import { sendAuthEmail, isEmailConfigured } from '@/lib/auth/send-email';
+import { sendAuthEmail, sendLoginOtpEmail, isEmailConfigured, logLoginOtpForDev } from '@/lib/auth/send-email';
 import { isTwilioConfigured, sendLoginOtpSms } from '@/lib/auth/twilio-sms';
 import { getSessionSecret } from '@/lib/auth/session-token';
 import { isSupabaseAdminConfigured } from '@/lib/auth/supabase-admin';
@@ -148,14 +148,19 @@ export async function POST(request: NextRequest) {
 
   if (emailOn && isEmailConfigured()) {
     try {
-      await sendAuthEmail({
-        to: email,
-        subject: 'Your PM Structure login code',
-        text: `Your verification code is ${code}. It expires in 10 minutes.`,
-      });
+      await sendLoginOtpEmail(email, code);
       otpChannels.email = true;
     } catch (err) {
       errors.push(`Email: ${err instanceof Error ? err.message : 'failed'}`);
+      logLoginOtpForDev(email, code);
+      if (process.env.NODE_ENV === 'development') {
+        otpChannels.email = true;
+      }
+    }
+  } else if (emailOn) {
+    logLoginOtpForDev(email, code);
+    if (process.env.NODE_ENV === 'development') {
+      otpChannels.email = true;
     }
   }
 

@@ -118,6 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     const data = (await res.json().catch(() => ({}))) as {
       error?: string;
+      code?: string;
       sessionToken?: string;
       requiresOtp?: boolean;
       challengeId?: string;
@@ -127,7 +128,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     if (!res.ok) {
-      throw new Error(data.error || 'Login failed');
+      const err = new Error(data.error || 'Login failed');
+      if (data.code) (err as Error & { code: string }).code = data.code;
+      throw err;
     }
 
     if (data.requiresOtp && data.challengeId) {

@@ -38,10 +38,21 @@ NEXT_PUBLIC_SUPABASE_URL=https://YOUR_REF.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
-# Email (OTP + reset) — Resend OR SMTP
-RESEND_API_KEY=re_...
-AUTH_EMAIL_FROM=onboarding@resend.dev
-AUTH_EMAIL_FROM_NAME=PM Structure
+# Email (OTP + reset) — SMTP **or** Resend (SMTP wins if SMTP_HOST is set)
+
+# --- Gmail example ---
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=587
+# SMTP_SECURE=false
+# SMTP_USER=you@gmail.com
+# SMTP_PASS=16-char-google-app-password
+# AUTH_EMAIL_FROM=you@gmail.com
+# AUTH_EMAIL_FROM_NAME=PM Structure
+
+# --- Resend alternative ---
+# RESEND_API_KEY=re_...
+# AUTH_EMAIL_FROM=onboarding@resend.dev
+# AUTH_EMAIL_FROM_NAME=PM Structure
 
 # SMS OTP (optional)
 TWILIO_ACCOUNT_SID=
@@ -62,11 +73,54 @@ curl -X POST http://localhost:3000/api/auth/bootstrap-password \
 
 Then sign in at **http://localhost:3000/login**.
 
+## SMTP setup (Gmail / Outlook)
+
+Edit **`dashboard/backend/.env.local`** (same file as Supabase keys). When `SMTP_HOST` is set, the app sends OTP and password-reset emails via SMTP instead of Resend.
+
+### Gmail / Google Workspace
+
+1. Enable **2-Step Verification** on the Google account.
+2. Create an **App password**: [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) → Mail → generate.
+3. Add to `dashboard/backend/.env.local`:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=nauticalinsights.ai@gmail.com
+SMTP_PASS=xxxx xxxx xxxx xxxx
+AUTH_EMAIL_FROM=nauticalinsights.ai@gmail.com
+AUTH_EMAIL_FROM_NAME=PM Structure
+```
+
+Use the **app password** in `SMTP_PASS`, not your normal Gmail password. Remove spaces or keep them — both usually work.
+
+### Outlook / Microsoft 365
+
+```env
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=you@yourdomain.com
+SMTP_PASS=your-password
+AUTH_EMAIL_FROM=you@yourdomain.com
+AUTH_EMAIL_FROM_NAME=PM Structure
+```
+
+### Test email
+
+```bash
+npm run dev
+node scripts/test-smtp.mjs nauticalinsights.ai@gmail.com
+```
+
+Restart `npm run dev` after editing `.env.local`.
+
 ## OTP (optional)
 
 1. Dashboard → **Site System → Security** — enable SMS/email new-device toggles.
 2. Set **E.164 phone** on the same page for SMS.
-3. Configure Twilio + Resend in `.env.local`.
+3. Configure **SMTP or Resend** in `dashboard/backend/.env.local`.
 4. Test in **incognito** — password OK → 6-digit code → verify → dashboard.
 
 ## API routes
@@ -95,5 +149,5 @@ Only if both sites point at the **same Supabase project** and same `dashboard_on
 | `Invalid origin` | `NEXT_PUBLIC_SITE_URL` = exact browser URL |
 | `Invalid email or password` | Run bootstrap; email in allowlist |
 | CMS Sync Error | Log in; need `auth_api_token` + API login |
-| `db:check-supabase` fails | Expose `dashboard_one`; run `db:migrate` |
+| `db:check-supabase` fails | Expose `dashboard_one` in Supabase API **or** run: `ALTER ROLE authenticator SET pgrst.db_schemas = 'public, graphql_public, dashboard_one'; NOTIFY pgrst, 'reload config';` |
 | OTP 503 | Enable Resend/Twilio; set phone; or disable OTP toggles |

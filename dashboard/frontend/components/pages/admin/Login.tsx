@@ -44,6 +44,12 @@ export const Login: React.FC = () => {
         setOtpStep(true);
         return;
       }
+      if (error instanceof Error && (error as Error & { code?: string }).code === 'PASSWORD_RESET_REQUIRED') {
+        setForgotMode(true);
+        setFormError('Your password must be reset. Use the form below to request a reset link.');
+        setIsError(true);
+        return;
+      }
       console.error('Login failed:', error);
       setFormError(error instanceof Error ? error.message : 'Login failed');
       setIsError(true);

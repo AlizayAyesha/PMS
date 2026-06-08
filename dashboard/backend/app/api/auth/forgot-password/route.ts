@@ -34,21 +34,36 @@ export async function POST(request: NextRequest) {
   if (!isKnownAdminEmail(email)) return generic;
 
   const creds = await getUserCredentials(email);
-  if (!creds || !isEmailConfigured()) return generic;
+  if (!creds) return generic;
 
   const token = generateResetToken();
   const tokenHash = hashResetToken(token);
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
   const db = getSupabaseDashboardOne();
-  await db.from('password_reset_tokens').insert({
+  const { error: insertError } = await db.from('password_reset_tokens').insert({
     email,
     token_hash: tokenHash,
     expires_at: expiresAt.toISOString(),
   });
 
+  if (insertError) {
+    console.error('[forgot-password] token insert failed', insertError);
+    return NextResponse.json({ error: 'Could not create reset token' }, { status: 503 });
+  }
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
   const link = `${siteUrl}/login/update-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+
+  if (!isEmailConfigured()) {
+    if (process.env.NODE_ENV === 'development' || process.env.AUTH_DEV_LOG_RESET_LINK === 'true') {
+      console.log('\n[forgot-password] Email not configured — reset link for dev:\n', link, '\n');
+    }
+    await writeAuthAuditLog({ email, eventType: 'password_reset_requested' }).catch((err) => {
+      console.error('[forgot-password] audit log failed', err);
+    });
+    return generic;
+  }
 
   try {
     await sendAuthEmail({
@@ -59,6 +74,9 @@ export async function POST(request: NextRequest) {
     await writeAuthAuditLog({ email, eventType: 'password_reset_requested' });
   } catch (err) {
     console.error('[forgot-password]', err);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('\n[forgot-password] Email send failed — reset link for dev:\n', link, '\n');
+    }
   }
 
   return generic;

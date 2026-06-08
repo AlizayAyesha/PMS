@@ -72,3 +72,27 @@ export async function sendAuthEmail(params: SendParams): Promise<void> {
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY?.trim() || process.env.SMTP_HOST?.trim());
 }
+
+function shouldLogAuthEmailInDev(): boolean {
+  return (
+    process.env.NODE_ENV === 'development' &&
+    (process.env.AUTH_DEV_LOG_RESET_LINK === 'true' || process.env.AUTH_DEV_LOG_OTP === 'true')
+  );
+}
+
+/** Login OTP — plain text + simple HTML for inbox clients. */
+export async function sendLoginOtpEmail(to: string, code: string): Promise<void> {
+  const subject = 'Your PM Structure login code';
+  const text = `Your verification code is ${code}. It expires in 10 minutes.\n\nIf you did not try to sign in, ignore this email.`;
+  const html = `<div style="font-family:system-ui,sans-serif;max-width:420px;margin:0 auto;padding:24px">
+  <p style="margin:0 0 16px;font-size:15px;color:#334155">Use this code to finish signing in to the PM Structure dashboard:</p>
+  <p style="margin:0 0 20px;font-size:32px;font-weight:700;letter-spacing:0.25em;color:#0f172a">${code}</p>
+  <p style="margin:0;font-size:13px;color:#64748b">Expires in 10 minutes. If you did not request this, you can ignore this email.</p>
+</div>`;
+  await sendAuthEmail({ to, subject, text, html });
+}
+
+export function logLoginOtpForDev(email: string, code: string): void {
+  if (!shouldLogAuthEmailInDev()) return;
+  console.log(`\n[login-otp] Email not configured — dev code for ${email}: ${code}\n`);
+}
