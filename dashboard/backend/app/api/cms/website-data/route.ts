@@ -40,11 +40,17 @@ export async function POST(request: NextRequest) {
   }
 
   if (body.action === 'saveDraft') {
+    const { data: existing } = await admin
+      .from('website_data')
+      .select('is_published')
+      .eq('field_key', fieldKey)
+      .maybeSingle();
+
     const { error } = await admin.from('website_data').upsert(
       {
         field_key: fieldKey,
         content: body.content ?? {},
-        is_published: false,
+        is_published: existing?.is_published ?? false,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'field_key' },

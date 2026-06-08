@@ -66,13 +66,19 @@ export const WebsiteDataService = {
       if (!isSupabaseAuthConfigured) {
         throw new Error('Supabase is not configured.');
       }
+      const { data: existing } = await supabase
+        .from('website_data')
+        .select('is_published')
+        .eq('field_key', fieldKey)
+        .maybeSingle();
+
       const { data, error } = await supabase
         .from('website_data')
         .upsert(
           {
             field_key: fieldKey,
             content,
-            is_published: false,
+            is_published: existing?.is_published ?? false,
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'field_key' },

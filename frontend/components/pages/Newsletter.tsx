@@ -14,19 +14,37 @@ import {
 } from "@/components/NewsletterComponents";
 import { PAGE_HERO_PADDING } from "@/components/SectionAmbience";
 import { useNewsletterArticles } from "@/hooks/useNewsletterArticles";
+import { useNewsletterHubConfig } from "@/hooks/useNewsletterHubConfig";
+import { useNewsletterCategories } from "@/hooks/useNewsletterCategories";
 import { getNewsletterArticleHref } from "@pms/site-content/newsletter-posts";
-
-const categories = [
-  "All", "PMP", "CAPM", "Agile", "Risk", "Business Analysis", 
-  "PRINCE2", "PMO", "Six Sigma", "Career Growth", "Exam Strategies"
-];
 
 const SUBSCRIBER_COUNT = "5,000+";
 
+function renderHeroTitle(title: string) {
+  const marker = "Structure";
+  const index = title.indexOf(marker);
+  if (index === -1) return title;
+  return (
+    <>
+      {title.slice(0, index)}
+      <span className="text-pms-gradient-blue-cyan">{marker}</span>
+      {title.slice(index + marker.length)}
+    </>
+  );
+}
+
 export function Newsletter() {
   const { articles, isLoading } = useNewsletterArticles();
+  const { config: hub } = useNewsletterHubConfig();
+  const categories = useNewsletterCategories(articles);
   const [activeCategory, setActiveCategory] = React.useState("All");
   const [visibleCount, setVisibleCount] = React.useState(4);
+
+  React.useEffect(() => {
+    if (!categories.includes(activeCategory)) {
+      setActiveCategory("All");
+    }
+  }, [activeCategory, categories]);
 
   const filteredArticles = React.useMemo(() => {
     if (activeCategory === "All") return articles;
@@ -59,13 +77,13 @@ export function Newsletter() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div className="max-w-3xl text-center md:text-left mx-auto md:mx-0">
               <Badge variant="outline" className="mb-6 border-[#0859b3]/25 text-[#0859b3] dark:text-[#57d5e2] bg-[#0859b3]/5 dark:bg-[#57d5e2]/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]">
-                Editorial & Insights
+                {hub.hero.badge}
               </Badge>
               <h1 className="font-heading text-hero font-bold tracking-tight leading-tight text-slate-900 dark:text-white mb-8">
-                The <span className="text-pms-gradient-blue-cyan">Structure</span> Report
+                {renderHeroTitle(hub.hero.title)}
               </h1>
               <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed font-medium max-w-2xl md:mx-0 mx-auto">
-                Expert analysis, certification strategies, and the latest trends in global project leadership. Delivered weekly to {SUBSCRIBER_COUNT} professionals.
+                {hub.hero.subtitle} Delivered weekly to {SUBSCRIBER_COUNT} professionals.
               </p>
               <p className="mt-6">
                 <Link

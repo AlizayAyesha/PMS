@@ -13,6 +13,7 @@ import {
 
 export function useNewsletterPosts() {
   const [registry, setRegistry] = useState<NewsletterPostsRegistry>(defaultNewsletterPostsRegistry());
+  const [isRegistryPublished, setIsRegistryPublished] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +23,7 @@ export function useNewsletterPosts() {
     try {
       const rows = await WebsiteDataService.getData('draft');
       const row = rows.find((item) => item.field_key === NEWSLETTER_POSTS_FIELD_KEY);
+      setIsRegistryPublished(Boolean(row?.is_published));
       if (row?.content) {
         setRegistry(parseNewsletterPostsRegistry(row.content));
       } else {
@@ -57,6 +59,7 @@ export function useNewsletterPosts() {
       );
       if (publish) {
         await WebsiteDataService.publish(NEWSLETTER_POSTS_FIELD_KEY);
+        setIsRegistryPublished(true);
       }
       setRegistry(next);
     } catch (err) {
@@ -78,10 +81,10 @@ export function useNewsletterPosts() {
       };
       if (index >= 0) nextPosts[index] = updated;
       else nextPosts.unshift(updated);
-      await persist({ version: 1, posts: nextPosts }, publish);
+      await persist({ version: 1, posts: nextPosts }, publish || isRegistryPublished);
       return updated;
     },
-    [persist, registry.posts],
+    [persist, registry.posts, isRegistryPublished],
   );
 
   const deletePost = useCallback(
@@ -90,9 +93,9 @@ export function useNewsletterPosts() {
         version: 1 as const,
         posts: registry.posts.filter((post) => post.id !== id),
       };
-      await persist(next);
+      await persist(next, isRegistryPublished);
     },
-    [persist, registry.posts],
+    [persist, registry.posts, isRegistryPublished],
   );
 
   return {

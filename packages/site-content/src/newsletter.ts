@@ -26,5 +26,7 @@ export function defaultNewsletterHubConfig(): NewsletterHubConfig {
 }
 
 export function parseNewsletterHubConfig(raw: unknown): NewsletterHubConfig {
-  return newsletterHubConfigSchema.parse(raw);
+  const result = newsletterHubConfigSchema.safeParse(raw);
+  if (result.success) return result.data;
+  return defaultNewsletterHubConfig();
 }

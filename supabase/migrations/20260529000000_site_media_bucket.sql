@@ -10,18 +10,22 @@ values (
 )
 on conflict (id) do nothing;
 
-create policy if not exists "Public read site media"
+drop policy if exists "Public read site media" on storage.objects;
+create policy "Public read site media"
   on storage.objects for select
   using (bucket_id = 'site-media');
 
-create policy if not exists "Authenticated upload site media"
+drop policy if exists "Authenticated upload site media" on storage.objects;
+create policy "Authenticated upload site media"
   on storage.objects for insert
   with check (bucket_id = 'site-media' and auth.role() = 'authenticated');
 
-create policy if not exists "Authenticated update site media"
+drop policy if exists "Authenticated update site media" on storage.objects;
+create policy "Authenticated update site media"
   on storage.objects for update
   using (bucket_id = 'site-media' and auth.role() = 'authenticated');
 
-create policy if not exists "Authenticated delete site media"
+drop policy if exists "Authenticated delete site media" on storage.objects;
+create policy "Authenticated delete site media"
   on storage.objects for delete
   using (bucket_id = 'site-media' and auth.role() = 'authenticated');
